@@ -1,0 +1,11 @@
+@import "../../utils/styleVariabeles/styleVariabeles.scss";
+
+.settingBar {
+  height: 40px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 4px 5px gray;
+  margin-top: 10px;
+}

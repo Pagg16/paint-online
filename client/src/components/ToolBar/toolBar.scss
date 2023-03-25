@@ -1,0 +1,38 @@
+.toolBar {
+  height: 40px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 4px 5px gray;
+  box-sizing: border-box;
+
+  &__btn {
+    height: 25px;
+    width: 25px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: transparent;
+    margin: 0 10px;
+  }
+
+  &__btn-image {
+    height: 100%;
+    width: 100%;
+  }
+  &__btn_rights {
+    margin-left: auto;
+  }
+  &__btn_arrow-redo {
+    transform: scale(-1, 1);
+  }
+  &__input-color {
+    background: linear-gradient(
+      to right,
+      rgb(255, 29, 29),
+      rgb(1, 255, 1),
+      rgb(81, 81, 255)
+    );
+  }
+}

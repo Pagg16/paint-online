@@ -12,6 +12,7 @@ import Brush from "../tools/Brush";
 import canvasState from "../../store/canvasState";
 import Rect from "../tools/Rect";
 import Circle from "../tools/Сircle";
+import Eraser from "../tools/Eraser";
 
 function ToolBar() {
   return (
@@ -40,7 +41,12 @@ function ToolBar() {
       >
         <img className="toolBar__btn-image" src={circle} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn">
+      <button
+        className="toolBar__btn"
+        onClick={() => {
+          toolState.setTool(new Eraser(canvasState.canvas));
+        }}
+      >
         <img className="toolBar__btn-image" src={eraser} alt="brush-icon" />
       </button>
       <button className="toolBar__btn">

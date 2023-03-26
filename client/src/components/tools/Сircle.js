@@ -28,11 +28,11 @@ export default class Circle extends Tools {
     if (this.mouseDown) {
       let currentX = e.pageX - e.target.offsetLeft;
       let currentY = e.pageY - e.target.offsetTop;
-      let radius = Math.round(
-        Math.pow(
-          Math.pow(currentY - this.stertY) + Math.pow(currentX - this.startX)
-        )
-      );
+
+      const catetA = Math.abs(currentY - this.stertY);
+      const catetB = Math.abs(currentX - this.startX);
+
+      let radius = Math.round(Math.sqrt(catetA * catetA + catetB * catetB));
       this.draw(this.startX, this.stertY, radius);
     }
   }
@@ -46,10 +46,8 @@ export default class Circle extends Tools {
       this.ctx.beginPath();
       this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
       this.ctx.fill();
-      this.ctx.stroke();
     };
     this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
     this.ctx.fill();
-    this.ctx.stroke();
   }
 }

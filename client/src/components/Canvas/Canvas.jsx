@@ -24,17 +24,21 @@ const Canvas = observer(() => {
 
   useEffect(() => {
     if (!!canvasState.userName) {
-      const socket = new WebSocket("ws:/localhost:5000/");
-      socket.onopen = () => {
-        console.log("Подключение установлено");
-        socket.send(
-          JSON.stringify({
-            id: id,
-            username: canvasState.userName,
-            metod: "connection",
-          })
-        );
-      };
+      try {
+        const socket = new WebSocket("ws:/localhost:5000/");
+        socket.onopen = () => {
+          console.log("Подключение установлено");
+          socket.send(
+            JSON.stringify({
+              id: id,
+              username: canvasState.userName,
+              metod: "connection",
+            })
+          );
+        };
+      } catch (e) {
+        console.log(e);
+      }
     }
   }, [canvasState.userName]);
 

@@ -15,6 +15,11 @@ import Circle from "../tools/Сircle";
 import Eraser from "../tools/Eraser";
 
 function ToolBar() {
+  function changeClolor(e) {
+    toolState.setStrokeColor(e.target.value);
+    toolState.setFillColor(e.target.value);
+  }
+
   return (
     <div className="toolBar">
       <button
@@ -52,12 +57,23 @@ function ToolBar() {
       <button className="toolBar__btn">
         <img className="toolBar__btn-image" src={line} alt="brush-icon" />
       </button>
-      <input type="color" className="toolBar__input-color" />
 
-      <button className="toolBar__btn toolBar__btn_rights">
+      <input
+        onChange={(e) => changeClolor(e)}
+        type="color"
+        className="toolBar__input-color"
+      />
+
+      <button
+        className="toolBar__btn toolBar__btn_rights"
+        onClick={() => canvasState.undo()}
+      >
         <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn toolBar__btn_arrow-redo">
+      <button
+        className="toolBar__btn toolBar__btn_arrow-redo"
+        onClick={() => canvasState.redo()}
+      >
         <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
       </button>
       <button className="toolBar__btn">

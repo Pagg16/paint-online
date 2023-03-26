@@ -11,9 +11,15 @@ const Canvas = observer(() => {
     canvasState.setCanvas(canvasRef?.current);
     toolState.setTool(new Brush(canvasRef?.current));
   }, []);
+
+  function mouseDovnHandler() {
+    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
+  }
+
   return (
     <div className="canvas">
       <canvas
+        onMouseDown={() => mouseDovnHandler()}
         ref={canvasRef}
         className="canvas__gtx"
         width={600}

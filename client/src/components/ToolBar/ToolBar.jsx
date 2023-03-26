@@ -7,17 +7,37 @@ import eraser from "../../images/eraser.png";
 import line from "../../images/line.png";
 import arrow from "../../images/arrow.png";
 import save from "../../images/save.png";
+import toolState from "../../store/toolState";
+import Brush from "../tools/Brush";
+import canvasState from "../../store/canvasState";
+import Rect from "../tools/Rect";
+import Circle from "../tools/Сircle";
 
 function ToolBar() {
   return (
     <div className="toolBar">
-      <button className="toolBar__btn">
+      <button
+        className="toolBar__btn"
+        onClick={() => {
+          toolState.setTool(new Brush(canvasState.canvas));
+        }}
+      >
         <img className="toolBar__btn-image" src={brush} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn">
+      <button
+        className="toolBar__btn"
+        onClick={() => {
+          toolState.setTool(new Rect(canvasState.canvas));
+        }}
+      >
         <img className="toolBar__btn-image" src={rect} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn">
+      <button
+        className="toolBar__btn"
+        onClick={() => {
+          toolState.setTool(new Circle(canvasState.canvas));
+        }}
+      >
         <img className="toolBar__btn-image" src={circle} alt="brush-icon" />
       </button>
       <button className="toolBar__btn">

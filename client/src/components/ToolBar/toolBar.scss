@@ -7,14 +7,20 @@
   box-shadow: 0 4px 5px gray;
   box-sizing: border-box;
 
+  .toolBar__btn_checked {
+    outline: 2px dotted red;
+  }
+
   &__btn {
-    height: 25px;
-    width: 25px;
+    height: 28px;
+    width: 28px;
     border: none;
     outline: none;
     cursor: pointer;
     background-color: transparent;
     margin: 0 10px;
+    padding: 2px;
+    box-sizing: border-box;
   }
 
   &__btn-image {

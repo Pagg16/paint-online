@@ -22,6 +22,7 @@ function SettingBar() {
             return toolState.setStrokeColor("rgba(0,0,0,0)");
           }
           if (isLineWidth) {
+            console.log(1);
             setIsLineWidth(false);
             toolState.setStrokeColor(isStrokeColor);
           }

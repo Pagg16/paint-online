@@ -32,8 +32,13 @@ const Canvas = observer(() => {
             JSON.stringify({
               id: id,
               username: canvasState.userName,
-              metod: "connection",
+              method: "connection",
             })
+          );
+        };
+        socket.onmessage = (e) => {
+          console.log(
+            "Пользователь " + JSON.parse(e.data).username + " подключлся"
           );
         };
       } catch (e) {
@@ -48,8 +53,8 @@ const Canvas = observer(() => {
         onMouseDown={() => mouseDovnHandler()}
         ref={canvasRef}
         className="canvas__gtx"
-        width={600}
-        height={400}
+        width={800}
+        height={700}
       ></canvas>
     </div>
   );

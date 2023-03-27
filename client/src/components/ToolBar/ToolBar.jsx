@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./toolBar.scss";
 import brush from "../../images/brush.png";
 import rect from "../../images/rect.png";
@@ -13,18 +13,30 @@ import canvasState from "../../store/canvasState";
 import Rect from "../tools/Rect";
 import Circle from "../tools/Сircle";
 import Eraser from "../tools/Eraser";
+import Line from "../tools/Line";
 
 function ToolBar() {
+  const checkedArr = useRef(null);
+
   function changeClolor(e) {
     toolState.setStrokeColor(e.target.value);
     toolState.setFillColor(e.target.value);
+  }
+
+  function checkedBts(e) {
+    if (!!checkedArr.current) {
+      checkedArr.current.classList.remove("toolBar__btn_checked");
+    }
+    checkedArr.current = e.currentTarget;
+    e.currentTarget.classList.add("toolBar__btn_checked");
   }
 
   return (
     <div className="toolBar">
       <button
         className="toolBar__btn"
-        onClick={() => {
+        onClick={(e) => {
+          checkedBts(e);
           toolState.setTool(new Brush(canvasState.canvas));
         }}
       >
@@ -32,7 +44,8 @@ function ToolBar() {
       </button>
       <button
         className="toolBar__btn"
-        onClick={() => {
+        onClick={(e) => {
+          checkedBts(e);
           toolState.setTool(new Rect(canvasState.canvas));
         }}
       >
@@ -40,7 +53,8 @@ function ToolBar() {
       </button>
       <button
         className="toolBar__btn"
-        onClick={() => {
+        onClick={(e) => {
+          checkedBts(e);
           toolState.setTool(new Circle(canvasState.canvas));
         }}
       >
@@ -48,13 +62,20 @@ function ToolBar() {
       </button>
       <button
         className="toolBar__btn"
-        onClick={() => {
+        onClick={(e) => {
+          checkedBts(e);
           toolState.setTool(new Eraser(canvasState.canvas));
         }}
       >
         <img className="toolBar__btn-image" src={eraser} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn">
+      <button
+        className="toolBar__btn"
+        onClick={(e) => {
+          checkedBts(e);
+          toolState.setTool(new Line(canvasState.canvas));
+        }}
+      >
         <img className="toolBar__btn-image" src={line} alt="brush-icon" />
       </button>
 

@@ -1,12 +1,9 @@
 const express = require("express");
 const app = express();
-const WSServer = require("express-ws");
+const WSServer = require("express-ws")(app);
+const aWss = WSServer.getWss();
 
 const PORT = process.env.PORT || 5000;
-
-app.ws("/", (ws, req) => {
-  console.log("Connection established");
-});
 
 app.ws("/", (ws, req) => {
   ws.on("message", (msg) => {

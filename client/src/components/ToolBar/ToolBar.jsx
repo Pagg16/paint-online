@@ -16,7 +16,7 @@ import Eraser from "../tools/Eraser";
 import Line from "../tools/Line";
 
 function ToolBar() {
-  const checkedArr = useRef(null);
+  const previousSelected = useRef(null);
 
   function changeClolor(e) {
     toolState.setStrokeColor(e.target.value);
@@ -24,20 +24,37 @@ function ToolBar() {
   }
 
   function checkedBts(e) {
-    if (!!checkedArr.current) {
-      checkedArr.current.classList.remove("toolBar__btn_checked");
+    if (!!previousSelected.current) {
+      previousSelected.current.classList.remove("toolBar__btn_checked");
     }
-    checkedArr.current = e.currentTarget;
+    previousSelected.current = e.currentTarget;
     e.currentTarget.classList.add("toolBar__btn_checked");
+  }
+
+  function download() {
+    const dataUrl = canvasState.canvas.toDataURL();
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = canvasState.sessionid + ".jpg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   return (
     <div className="toolBar">
       <button
-        className="toolBar__btn"
+        className="toolBar__btn toolBar__btn_checked"
+        ref={previousSelected}
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool(new Brush(canvasState.canvas));
+          toolState.setTool(
+            new Brush(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
+          );
         }}
       >
         <img className="toolBar__btn-image" src={brush} alt="brush-icon" />
@@ -46,7 +63,13 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool(new Rect(canvasState.canvas));
+          toolState.setTool(
+            new Rect(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
+          );
         }}
       >
         <img className="toolBar__btn-image" src={rect} alt="brush-icon" />
@@ -97,7 +120,7 @@ function ToolBar() {
       >
         <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
       </button>
-      <button className="toolBar__btn">
+      <button className="toolBar__btn" onClick={download}>
         <img className="toolBar__btn-image" src={save} alt="brush-icon" />
       </button>
     </div>

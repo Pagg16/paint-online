@@ -15,7 +15,6 @@ const Canvas = observer(() => {
 
   useEffect(() => {
     canvasState.setCanvas(canvasRef?.current);
-    toolState.setTool(new Brush(canvasRef?.current));
   }, []);
 
   function mouseDovnHandler() {
@@ -26,6 +25,9 @@ const Canvas = observer(() => {
     if (!!canvasState.userName) {
       try {
         const socket = new WebSocket("ws:/localhost:5000/");
+        canvasState.setSocket(socket);
+        canvasState.setSessionId(id);
+        toolState.setTool(new Brush(canvasRef?.current, socket, id));
         socket.onopen = () => {
           console.log("Подключение установлено");
           socket.send(
@@ -37,15 +39,39 @@ const Canvas = observer(() => {
           );
         };
         socket.onmessage = (e) => {
-          console.log(
-            "Пользователь " + JSON.parse(e.data).username + " подключлся"
-          );
+          const msg = JSON.parse(e.data);
+
+          switch (msg.method) {
+            case "connection":
+              console.log(`пользователь ${msg.username} подключен`);
+              break;
+
+            case "draw":
+              drawHandler(msg);
+              break;
+
+            default:
+              break;
+          }
         };
       } catch (e) {
         console.log(e);
       }
     }
   }, [canvasState.userName]);
+
+  function drawHandler(msg) {
+    const figure = msg.figure;
+    const ctx = canvasRef.current.getContext("2d");
+    switch (figure.type) {
+      case "brush":
+        Brush.draw(ctx, figure.x, figure.y);
+        break;
+
+      default:
+        break;
+    }
+  }
 
   return (
     <div className="canvas">

@@ -32,6 +32,7 @@ app.post("/image", (req, res) => {
       data,
       "base64"
     );
+    return res.status(200).json({ message: "Загружено" });
   } catch (e) {
     console.log(e);
     return res.status(500).json("eror");
@@ -40,6 +41,9 @@ app.post("/image", (req, res) => {
 
 app.get("/image", (req, res) => {
   try {
+    const file = fs.readFileSync(__dirname, "files", `${req.query.id}.jpg`);
+    const data = `data:image/png;base64,` + file.toString("base64");
+    res.json(data);
   } catch (e) {
     console.log(e);
     return res.status(500).json("eror");

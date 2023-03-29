@@ -6,9 +6,11 @@ const cors = require("cors");
 const PORT = process.env.PORT || 5000;
 const fs = require("fs");
 const path = require("path");
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.json());
 
 app.use(cors());
-app.use(express.json());
 
 app.ws("/", (ws, req) => {
   ws.on("message", (msg) => {
@@ -35,15 +37,19 @@ app.post("/image", (req, res) => {
     return res.status(200).json({ message: "Загружено" });
   } catch (e) {
     console.log(e);
-    return res.status(500).json("eror");
+    return res.status(500).json("error");
   }
 });
 
 app.get("/image", (req, res) => {
   try {
-    const file = fs.readFileSync(__dirname, "files", `${req.query.id}.jpg`);
-    const data = `data:image/png;base64,` + file.toString("base64");
-    res.json(data);
+    const filePath = path.resolve(__dirname, "files", `${req.query.id}.jpg`);
+    if (fs.existsSync(filePath)) {
+      const file = fs.readFileSync(filePath);
+      const data = `data:image/png;base64,` + file.toString("base64");
+      return res.json(data);
+    }
+    return res.json(null);
   } catch (e) {
     console.log(e);
     return res.status(500).json("eror");

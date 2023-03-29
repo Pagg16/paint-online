@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import "./canvas.scss";
 import canvasState from "../../store/canvasState";
@@ -7,27 +7,41 @@ import Brush from "../tools/Brush";
 import { useParams } from "react-router-dom";
 import Rect from "../tools/Rect";
 import axios from "axios";
+import Circle from "../tools/Сircle";
+import Line from "../tools/Line";
+import Eraser from "../tools/Eraser";
 
 const Canvas = observer(() => {
   const canvasRef = useRef(null);
+  const [canvasSize, setCanvasSize] = useState({
+    width: 0,
+    height: 0,
+  });
 
+  const canvasBlock = useRef(null);
   const { id } = useParams();
 
-  console.log(id);
+  useEffect(() => {
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.beginPath();
+    ctx.ellipse(100, 100, 50, 70, Math.PI / 4, 0, 2 * Math.PI);
+    ctx.stroke();
+    const style = getComputedStyle(canvasBlock.current);
+    setCanvasSize({
+      width: +style.width.replace("px", ""),
+      height: +style.height.replace("px", ""),
+    });
+  }, []);
 
   useEffect(() => {
     canvasState.setCanvas(canvasRef?.current);
     axios.get(`http://localhost:5000/image?id=${id}`).then((res) => {
+      const ctx = canvasRef.current.getContext("2d");
       const img = new Image();
       img.src = res.data;
       img.onload = () => {
-        this.ctx.clearRect(
-          0,
-          0,
-          canvasRef.current.width,
-          canvasRef.current.height
-        );
-        this.ctx.drawImage(
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.drawImage(
           img,
           0,
           0,
@@ -40,11 +54,10 @@ const Canvas = observer(() => {
 
   function mouseDovnHandler() {
     canvasState.pushToUndoList(canvasRef?.current.toDataURL());
-    axios
-      .post(`http://localhost:5000/image?id=${id}`, {
-        img: canvasState.canvas.toDataURL(),
-      })
-      .then((res) => {});
+
+    axios.post(`http://localhost:5000/image?id=${id}`, {
+      img: canvasState.canvas.toDataURL(),
+    });
   }
 
   useEffect(() => {
@@ -53,6 +66,13 @@ const Canvas = observer(() => {
         const socket = new WebSocket("ws:/localhost:5000/");
         canvasState.setSocket(socket);
         canvasState.setSessionId(id);
+        toolState.setTool(
+          new Brush(
+            canvasState.canvas,
+            canvasState.socket,
+            canvasState.sessionid
+          )
+        );
         toolState.setTool(new Brush(canvasRef?.current, socket, id));
         socket.onopen = () => {
           console.log("Подключение установлено");
@@ -89,9 +109,12 @@ const Canvas = observer(() => {
   function drawHandler(msg) {
     const figure = msg.figure;
     const ctx = canvasRef.current.getContext("2d");
+
+    if (figure.type !== "finish") ctx.setLineDash(figure.lineDash);
+
     switch (figure.type) {
       case "brush":
-        Brush.draw(ctx, figure.x, figure.y);
+        Brush.draw(ctx, figure.x, figure.y, figure.color);
         break;
 
       case "rect":
@@ -105,6 +128,25 @@ const Canvas = observer(() => {
         );
         break;
 
+      case "circle":
+        Circle.staticDraw(ctx, figure.x, figure.y, figure.radius, figure.color);
+        break;
+
+      case "line":
+        Line.staticDraw(
+          ctx,
+          figure.x,
+          figure.y,
+          figure.currentX,
+          figure.currentY,
+          figure.color
+        );
+        break;
+
+      case "eraser":
+        Eraser.draw(ctx, figure.x, figure.y);
+        break;
+
       case "finish":
         ctx.beginPath();
         break;
@@ -115,13 +157,13 @@ const Canvas = observer(() => {
   }
 
   return (
-    <div className="canvas">
+    <div className="canvas" ref={canvasBlock}>
       <canvas
-        onMouseDown={() => mouseDovnHandler()}
+        onMouseUp={() => mouseDovnHandler()}
         ref={canvasRef}
         className="canvas__gtx"
-        width={800}
-        height={700}
+        width={canvasSize.width}
+        height={canvasSize.height}
       ></canvas>
     </div>
   );

@@ -7,6 +7,8 @@ import eraser from "../../images/eraser.png";
 import line from "../../images/line.png";
 import arrow from "../../images/arrow.png";
 import save from "../../images/save.png";
+import ellipse from "../../images/ellipse.png";
+import triangle from "../../images/triangle.png";
 import toolState from "../../store/toolState";
 import Brush from "../tools/Brush";
 import canvasState from "../../store/canvasState";
@@ -14,19 +16,13 @@ import Rect from "../tools/Rect";
 import Circle from "../tools/Сircle";
 import Eraser from "../tools/Eraser";
 import Line from "../tools/Line";
+import Triangle from "../tools/Triangle";
 
 function ToolBar() {
   const previousSelected = useRef(null);
 
-  function changeClolor(e) {
-    toolState.setStrokeColor(e.target.value);
-    toolState.setFillColor(e.target.value);
-  }
-
   function checkedBts(e) {
-    if (!!previousSelected.current) {
-      previousSelected.current.classList.remove("toolBar__btn_checked");
-    }
+    previousSelected.current.classList.remove("toolBar__btn_checked");
     previousSelected.current = e.currentTarget;
     e.currentTarget.classList.add("toolBar__btn_checked");
   }
@@ -43,6 +39,24 @@ function ToolBar() {
 
   return (
     <div className="toolBar">
+      <div className="toolBar__btn-container">
+        <button
+          className="toolBar__btn toolBar__btn_rights"
+          onClick={() => canvasState.undo()}
+        >
+          <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
+        </button>
+        <button
+          className="toolBar__btn toolBar__btn_arrow-redo"
+          onClick={() => canvasState.redo()}
+        >
+          <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
+        </button>
+        <button className="toolBar__btn" onClick={download}>
+          <img className="toolBar__btn-image" src={save} alt="brush-icon" />
+        </button>
+      </div>
+
       <button
         className="toolBar__btn toolBar__btn_checked"
         ref={previousSelected}
@@ -78,7 +92,13 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool(new Circle(canvasState.canvas));
+          toolState.setTool(
+            new Circle(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
+          );
         }}
       >
         <img className="toolBar__btn-image" src={circle} alt="brush-icon" />
@@ -87,7 +107,13 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool(new Eraser(canvasState.canvas));
+          toolState.setTool(
+            new Eraser(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
+          );
         }}
       >
         <img className="toolBar__btn-image" src={eraser} alt="brush-icon" />
@@ -96,32 +122,40 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool(new Line(canvasState.canvas));
+          toolState.setTool(
+            new Line(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
+          );
         }}
       >
         <img className="toolBar__btn-image" src={line} alt="brush-icon" />
       </button>
 
-      <input
-        onChange={(e) => changeClolor(e)}
-        type="color"
-        className="toolBar__input-color"
-      />
+      <button
+        className="toolBar__btn"
+        onClick={(e) => {
+          checkedBts(e);
+          toolState.setTool();
+        }}
+      >
+        <img className="toolBar__btn-image" src={ellipse} alt="brush-icon" />
+      </button>
 
       <button
-        className="toolBar__btn toolBar__btn_rights"
-        onClick={() => canvasState.undo()}
+        className="toolBar__btn"
+        onClick={(e) => {
+          checkedBts(e);
+          new Triangle(
+            canvasState.canvas,
+            canvasState.socket,
+            canvasState.sessionid
+          );
+        }}
       >
-        <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
-      </button>
-      <button
-        className="toolBar__btn toolBar__btn_arrow-redo"
-        onClick={() => canvasState.redo()}
-      >
-        <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
-      </button>
-      <button className="toolBar__btn" onClick={download}>
-        <img className="toolBar__btn-image" src={save} alt="brush-icon" />
+        <img className="toolBar__btn-image" src={triangle} alt="brush-icon" />
       </button>
     </div>
   );

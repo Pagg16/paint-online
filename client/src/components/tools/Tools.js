@@ -3,6 +3,7 @@ export default class Tools {
     this.canvas = canvas;
     this.socket = socket;
     this.id = id;
+    this.lineDashType = [];
     this.ctx = canvas.getContext("2d");
     this.destroyEvents();
   }
@@ -17,6 +18,11 @@ export default class Tools {
 
   lineWidth(width) {
     this.ctx.lineWidth = width;
+  }
+
+  lineDash(lineDash) {
+    this.lineDashType = lineDash;
+    this.ctx.setLineDash(lineDash);
   }
 
   destroyEvents() {

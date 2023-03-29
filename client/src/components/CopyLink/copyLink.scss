@@ -1,0 +1,33 @@
+.copyLink {
+  display: flex;
+  align-items: center;
+  margin-top: 40px;
+  flex-direction: column;
+  border-radius: 1rem;
+  border: 2px dotted rgb(216, 216, 216);
+  box-sizing: border-box;
+  padding: 3px;
+
+  &:hover {
+    transform: scale(1.1, 1.1);
+  }
+
+  &__bts {
+    padding: 5px;
+    border-radius: 1rem;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+
+  &__subtitle {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+}

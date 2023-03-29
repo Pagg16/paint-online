@@ -24,7 +24,7 @@ function App() {
           element={<Navigate replace to={`f${(+new Date()).toString(16)}`} />}
         />
       </Routes>
-      <SingInModal />
+      {/* <SingInModal /> */}
     </div>
   );
 }

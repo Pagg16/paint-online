@@ -18,6 +18,9 @@ class ToolState {
   setLineWidth(width) {
     this.tool.lineWidth(width);
   }
+  setLineDash(lineDash) {
+    this.tool.lineDash(lineDash);
+  }
 }
 
 export default ToolState = new ToolState();

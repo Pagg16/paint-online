@@ -1,15 +1,88 @@
 @import "../../utils/styleVariabeles/styleVariabeles.scss";
 
 .settingBar {
-  height: 40px;
-  background-color: white;
+  height: 100%;
+  background-color: #6b77ac;
   display: flex;
   align-items: center;
-  width: 100%;
+  flex-direction: column;
   box-shadow: 0 4px 5px gray;
-  margin-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  box-sizing: border-box;
+  padding: 0 5px;
+
+  &__input-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+    padding: 15px 0 0;
+  }
+
+  &__inputLabel {
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  &__width-line {
+    color: rgb(255, 255, 255);
+    border: 2px solid rgb(21, 1, 131);
+    padding: 5px;
+    border-radius: 1rem;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+  }
+
+  &__input-line-width {
+    margin: 0 10px;
+  }
+
+  &__input-color {
+    background: linear-gradient(
+      to right,
+      rgb(255, 29, 29),
+      rgb(1, 255, 1),
+      rgb(81, 81, 255)
+    );
+  }
+
+  &__line-type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 15px;
+  }
+
+  &__line-type-checkbox-canvas-continer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+  }
+
+  &__line-type-checkbox {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: space-around;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &__canvas {
+    width: 100%;
+  }
 }
 
-.settingBar__input-line-width {
-  margin: 0 10px;
+input[type="checkbox"] {
+  zoom: 1.5;
 }

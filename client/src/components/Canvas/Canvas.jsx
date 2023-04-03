@@ -10,6 +10,13 @@ import axios from "axios";
 import Circle from "../tools/Сircle";
 import Line from "../tools/Line";
 import Eraser from "../tools/Eraser";
+import { getImage, postImage } from "../../api/api";
+import {
+  createSoket,
+  onmessageSocket,
+  onopenSocket,
+} from "../../socket/socketCreate";
+import Triangle from "../tools/Triangle";
 
 const Canvas = observer(() => {
   const canvasRef = useRef(null);
@@ -21,11 +28,9 @@ const Canvas = observer(() => {
   const canvasBlock = useRef(null);
   const { id } = useParams();
 
+  const ctxStyleUser = useRef({});
+
   useEffect(() => {
-    const ctx = canvasRef.current.getContext("2d");
-    ctx.beginPath();
-    ctx.ellipse(100, 100, 50, 70, Math.PI / 4, 0, 2 * Math.PI);
-    ctx.stroke();
     const style = getComputedStyle(canvasBlock.current);
     setCanvasSize({
       width: +style.width.replace("px", ""),
@@ -35,7 +40,7 @@ const Canvas = observer(() => {
 
   useEffect(() => {
     canvasState.setCanvas(canvasRef?.current);
-    axios.get(`http://localhost:5000/image?id=${id}`).then((res) => {
+    getImage(id).then((res) => {
       const ctx = canvasRef.current.getContext("2d");
       const img = new Image();
       img.src = res.data;
@@ -52,29 +57,14 @@ const Canvas = observer(() => {
     });
   }, []);
 
-  function mouseDovnHandler() {
-    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
-
-    axios.post(`http://localhost:5000/image?id=${id}`, {
-      img: canvasState.canvas.toDataURL(),
-    });
-  }
-
   useEffect(() => {
-    if (!!canvasState.userName) {
+    if (!!!canvasState.userName) {
       try {
-        const socket = new WebSocket("ws:/localhost:5000/");
+        const socket = createSoket();
         canvasState.setSocket(socket);
         canvasState.setSessionId(id);
-        toolState.setTool(
-          new Brush(
-            canvasState.canvas,
-            canvasState.socket,
-            canvasState.sessionid
-          )
-        );
-        toolState.setTool(new Brush(canvasRef?.current, socket, id));
-        socket.onopen = () => {
+        toolState.setTool(new Brush(canvasRef.current, socket, id));
+        onopenSocket(socket, () => {
           console.log("Подключение установлено");
           socket.send(
             JSON.stringify({
@@ -83,9 +73,12 @@ const Canvas = observer(() => {
               method: "connection",
             })
           );
-        };
-        socket.onmessage = (e) => {
+        });
+        onmessageSocket(socket, (e) => {
           const msg = JSON.parse(e.data);
+          const figure = msg.figure;
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext("2d");
 
           switch (msg.method) {
             case "connection":
@@ -93,43 +86,74 @@ const Canvas = observer(() => {
               break;
 
             case "draw":
-              drawHandler(msg);
+              const { lineDash, lineWidth, strokeColor, fillColor } = figure;
+
+              ctxStyleUser.current = {
+                lineDashUser: JSON.parse(
+                  JSON.stringify(toolState.lineDashType)
+                ),
+                lineWidthUser: ctx.lineWidth,
+                strokeColorUser: ctx.strokeStyle,
+                fillColorUser: ctx.fillStyle,
+              };
+
+              setStyleCtx(lineDash, lineWidth, strokeColor, fillColor, ctx);
+              drawHandler(figure, ctx);
+              const {
+                lineDashUser,
+                lineWidthUser,
+                strokeColorUser,
+                fillColorUser,
+              } = ctxStyleUser.current;
+
+              setStyleCtx(
+                lineDashUser,
+                lineWidthUser,
+                strokeColorUser,
+                fillColorUser,
+                ctx
+              );
+              break;
+
+            case "rest":
+              restCanvas(canvas);
               break;
 
             default:
               break;
           }
-        };
+        });
       } catch (e) {
         console.log(e);
       }
     }
   }, [canvasState.userName]);
 
-  function drawHandler(msg) {
-    const figure = msg.figure;
-    const ctx = canvasRef.current.getContext("2d");
+  function restCanvas(canvas) {
+    canvasState.pushToUndoList(canvas.toDataURL());
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    postImage(id).catch((e) => console.log(e));
+  }
 
-    if (figure.type !== "finish") ctx.setLineDash(figure.lineDash);
+  function setStyleCtx(lineDash, lineWidth, strokeColor, fillColor, ctx) {
+    ctx.setLineDash(lineDash || []);
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = strokeColor;
+    ctx.fillStyle = fillColor;
+  }
 
+  function drawHandler(figure, ctx) {
     switch (figure.type) {
       case "brush":
-        Brush.draw(ctx, figure.x, figure.y, figure.color);
+        Brush.draw(ctx, figure.x, figure.y);
         break;
 
       case "rect":
-        Rect.staticDraw(
-          ctx,
-          figure.x,
-          figure.y,
-          figure.width,
-          figure.height,
-          figure.color
-        );
+        Rect.staticDraw(ctx, figure.x, figure.y, figure.width, figure.height);
         break;
 
       case "circle":
-        Circle.staticDraw(ctx, figure.x, figure.y, figure.radius, figure.color);
+        Circle.staticDraw(ctx, figure.x, figure.y, figure.radius);
         break;
 
       case "line":
@@ -138,13 +162,33 @@ const Canvas = observer(() => {
           figure.x,
           figure.y,
           figure.currentX,
-          figure.currentY,
-          figure.color
+          figure.currentY
         );
         break;
 
       case "eraser":
         Eraser.draw(ctx, figure.x, figure.y);
+        break;
+
+      case "triangle":
+        const {
+          previosStartX,
+          previosStartY,
+          previosCurrentX,
+          previosCurrentY,
+          currentX,
+          currentY,
+        } = figure;
+
+        Triangle.staticDraw(
+          ctx,
+          previosStartX,
+          previosStartY,
+          previosCurrentX,
+          previosCurrentY,
+          currentX,
+          currentY
+        );
         break;
 
       case "finish":
@@ -156,10 +200,15 @@ const Canvas = observer(() => {
     }
   }
 
+  function mouseUpHandler() {
+    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
+    postImage(id).catch((e) => console.log(e));
+  }
+
   return (
     <div className="canvas" ref={canvasBlock}>
       <canvas
-        onMouseUp={() => mouseDovnHandler()}
+        onMouseUp={() => mouseUpHandler()}
         ref={canvasRef}
         className="canvas__gtx"
         width={canvasSize.width}

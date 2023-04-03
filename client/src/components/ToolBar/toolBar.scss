@@ -54,4 +54,24 @@
   &__btn_arrow-redo:hover {
     transform: scale(-1.1, 1.1);
   }
+
+  &__delimiter {
+    height: 1px;
+    width: 100%;
+    background-color: white;
+  }
+
+  &__clear-bts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2rem;
+    box-sizing: border-box;
+    padding: 2px;
+    margin-top: 30px;
+  }
+  &__rest-icon {
+    width: 50px;
+    height: 50px;
+  }
 }

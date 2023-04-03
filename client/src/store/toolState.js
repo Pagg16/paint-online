@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx";
 
 class ToolState {
   tool = null;
+  lineDashType = [];
   constructor() {
     makeAutoObservable(this);
   }
@@ -19,6 +20,7 @@ class ToolState {
     this.tool.lineWidth(width);
   }
   setLineDash(lineDash) {
+    this.lineDashType = lineDash;
     this.tool.lineDash(lineDash);
   }
 }

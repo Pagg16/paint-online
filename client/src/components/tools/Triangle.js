@@ -1,9 +1,11 @@
+import toolState from "../../store/toolState";
 import Tools from "./Tools";
 
 export default class Triangle extends Tools {
   constructor(canvas, socket, id) {
     super(canvas, socket, id);
     this.mouseClickNum = 0;
+    this.transparentStroke = false;
     this.listen();
   }
 
@@ -18,6 +20,37 @@ export default class Triangle extends Tools {
     if (this.mouseClickNum >= 2) {
       this.mouseDown = false;
       this.mouseClickNum = 0;
+      const img = new Image();
+      img.src = this.saved;
+      console.log(this.saved);
+      img.onload = () => {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+      };
+      this.socket.send(
+        JSON.stringify({
+          method: "draw",
+          id: this.id,
+          figure: {
+            type: "triangle",
+            currentX: this.currentX,
+            currentY: this.currentY,
+            previosStartX: this.previosStartX,
+            previosStartY: this.previosStartY,
+            previosCurrentX: this.previosCurrentX,
+            previosCurrentY: this.previosCurrentY,
+            strokeColor: this.ctx.strokeStyle,
+            fillColor: this.ctx.fillStyle,
+            lineDash: toolState.lineDashType,
+            lineWidth: this.ctx.lineWidth,
+          },
+        })
+      );
+    }
+    if (this.transparentStroke) {
+      this.ctx.lineWidth = "0";
+      this.ctx.strokeStyle = "rgba(0, 0, 0, 0)";
+      this.transparentStroke = false;
     }
   }
 
@@ -29,6 +62,12 @@ export default class Triangle extends Tools {
     if (this.mouseClickNum === 0) {
       this.previosStartX = this.startX;
       this.previosStartY = this.stertY;
+
+      if (this.ctx.strokeStyle === "rgba(0, 0, 0, 0)") {
+        this.ctx.lineWidth = "1";
+        this.ctx.strokeStyle = "black";
+        this.transparentStroke = true;
+      }
     }
 
     this.saved = this.canvas.toDataURL();
@@ -36,35 +75,29 @@ export default class Triangle extends Tools {
 
   mouseMovehandler(e) {
     if (this.mouseDown) {
-      let currentX = e.pageX - e.target.offsetLeft;
-      let currentY = e.pageY - e.target.offsetTop;
-
+      this.currentX = e.pageX - e.target.offsetLeft;
+      this.currentY = e.pageY - e.target.offsetTop;
       if (this.mouseClickNum === 0) {
-        this.previosCurrentX = currentX;
-        this.previosCurrentY = currentY;
+        this.previosCurrentX = this.currentX;
+        this.previosCurrentY = this.currentY;
       }
-
-      this.draw(currentX, currentY);
+      this.draw();
     }
   }
 
-  draw(x, y) {
+  draw() {
     const img = new Image();
     img.src = this.saved;
-
     if (this.mouseClickNum >= 1) {
       img.onload = () => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.startX, this.stertY);
-        this.ctx.lineTo(x, y);
-        this.ctx.fill();
-        this.ctx.stroke();
         this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
         this.ctx.beginPath();
         this.ctx.moveTo(this.previosStartX, this.previosStartY);
         this.ctx.lineTo(this.previosCurrentX, this.previosCurrentY);
-        this.ctx.lineTo(x, y);
+        this.ctx.lineTo(this.currentX, this.currentY);
+        this.ctx.closePath();
+        this.ctx.stroke();
         this.ctx.fill();
       };
     } else {
@@ -73,18 +106,28 @@ export default class Triangle extends Tools {
         this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
         this.ctx.beginPath();
         this.ctx.moveTo(this.startX, this.stertY);
-        this.ctx.lineTo(x, y);
+        this.ctx.lineTo(this.currentX, this.currentY);
         this.ctx.fill();
         this.ctx.stroke();
       };
     }
   }
 
-  static staticDraw(ctx, x, y, w, h, color) {
-    ctx.fillStyle = color;
+  static staticDraw(
+    ctx,
+    previosStartX,
+    previosStartY,
+    previosCurrentX,
+    previosCurrentY,
+    currentX,
+    currentY
+  ) {
     ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.fill();
+    ctx.moveTo(previosStartX, previosStartY);
+    ctx.lineTo(previosCurrentX, previosCurrentY);
+    ctx.lineTo(currentX, currentY);
+    ctx.closePath();
     ctx.stroke();
+    ctx.fill();
   }
 }

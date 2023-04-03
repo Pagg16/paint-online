@@ -1,3 +1,4 @@
+import toolState from "../../store/toolState";
 import Tools from "./Tools";
 
 export default class Line extends Tools {
@@ -14,6 +15,13 @@ export default class Line extends Tools {
 
   mouseUphandler(e) {
     this.mouseDown = false;
+    const img = new Image();
+    img.src = this.saved;
+    console.log(this.saved);
+    img.onload = () => {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+    };
     this.socket.send(
       JSON.stringify({
         method: "draw",
@@ -24,7 +32,10 @@ export default class Line extends Tools {
           y: this.stertY,
           currentX: this.currentX,
           currentY: this.currentY,
-          color: this.ctx.fillStyle,
+          strokeColor: this.ctx.strokeStyle,
+          fillColor: this.ctx.fillStyle,
+          lineDash: toolState.lineDashType,
+          lineWidth: this.ctx.lineWidth,
         },
       })
     );

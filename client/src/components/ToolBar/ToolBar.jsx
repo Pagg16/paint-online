@@ -10,6 +10,7 @@ import save from "../../images/save.png";
 import ellipse from "../../images/ellipse.png";
 import triangle from "../../images/triangle.png";
 import toolState from "../../store/toolState";
+import rest from "../../images/rest.png";
 import Brush from "../tools/Brush";
 import canvasState from "../../store/canvasState";
 import Rect from "../tools/Rect";
@@ -17,8 +18,12 @@ import Circle from "../tools/Сircle";
 import Eraser from "../tools/Eraser";
 import Line from "../tools/Line";
 import Triangle from "../tools/Triangle";
+import { useParams } from "react-router-dom";
+import Ellipse from "../tools/Ellipse";
 
 function ToolBar() {
+  const { id } = useParams();
+
   const previousSelected = useRef(null);
 
   function checkedBts(e) {
@@ -139,6 +144,11 @@ function ToolBar() {
         onClick={(e) => {
           checkedBts(e);
           toolState.setTool();
+          new Ellipse(
+            canvasState.canvas,
+            canvasState.socket,
+            canvasState.sessionid
+          );
         }}
       >
         <img className="toolBar__btn-image" src={ellipse} alt="brush-icon" />
@@ -156,6 +166,22 @@ function ToolBar() {
         }}
       >
         <img className="toolBar__btn-image" src={triangle} alt="brush-icon" />
+      </button>
+
+      <div className="toolBar__delimiter"></div>
+
+      <button
+        className="toolBar__clear-bts"
+        onClick={() => {
+          canvasState.socket.send(
+            JSON.stringify({
+              method: "rest",
+              id: id,
+            })
+          );
+        }}
+      >
+        <img src={rest} alt="rest-icon" className="toolBar__rest-icon" />
       </button>
     </div>
   );

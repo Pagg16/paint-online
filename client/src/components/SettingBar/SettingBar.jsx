@@ -24,7 +24,6 @@ function SettingBar() {
   ];
 
   useEffect(() => {
-    const style = getComputedStyle(containerCanvCheck.current);
     const width = 260;
     containerCanvCheck.current.style.height = "150px";
     canvas.current.width = width;
@@ -47,12 +46,24 @@ function SettingBar() {
     });
   }, []);
 
+  useEffect(() => {
+    checkbox.current.checked = true;
+  }, []);
+
   function checkboxChoice(e) {
     checkbox.current.checked = false;
     checkbox.current = e.currentTarget;
     e.currentTarget.checked = true;
 
-    toolState.setLineDash(JSON.parse(e.target.value));
+    const dashedType = JSON.parse(e.target.value);
+
+    let correction = 1;
+
+    if (lineWidth >= 10 && lineWidth <= 60) {
+      correction = correction * 2;
+    }
+
+    toolState.setLineDash(dashedType.map((elem) => elem * correction));
   }
 
   return (
@@ -92,7 +103,6 @@ function SettingBar() {
         >
           <div className="settingBar__line-type-checkbox">
             <input
-              checked
               type="checkbox"
               ref={checkbox}
               value={`[${lineTypes[0]}]`}
@@ -152,7 +162,7 @@ function SettingBar() {
           type="color"
           onChange={(e) => {
             setIsStrokeColor(e.target.value);
-            if (!!!lineWidth) toolState.setStrokeColor(e.target.value);
+            if (!!lineWidth) toolState.setStrokeColor(e.target.value);
           }}
         />
       </div>
@@ -163,7 +173,6 @@ function SettingBar() {
         </label>
         <input
           onChange={(e) => {
-            toolState.setStrokeColor(e.target.value);
             toolState.setFillColor(e.target.value);
           }}
           type="color"

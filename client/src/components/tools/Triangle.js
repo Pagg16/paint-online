@@ -22,30 +22,30 @@ export default class Triangle extends Tools {
       this.mouseClickNum = 0;
       const img = new Image();
       img.src = this.saved;
-      console.log(this.saved);
       img.onload = () => {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+
+        this.socket.send(
+          JSON.stringify({
+            method: "draw",
+            id: this.id,
+            figure: {
+              type: "triangle",
+              currentX: this.currentX,
+              currentY: this.currentY,
+              previosStartX: this.previosStartX,
+              previosStartY: this.previosStartY,
+              previosCurrentX: this.previosCurrentX,
+              previosCurrentY: this.previosCurrentY,
+              strokeColor: this.ctx.strokeStyle,
+              fillColor: this.ctx.fillStyle,
+              lineDash: toolState.lineDashType,
+              lineWidth: this.ctx.lineWidth,
+            },
+          })
+        );
       };
-      this.socket.send(
-        JSON.stringify({
-          method: "draw",
-          id: this.id,
-          figure: {
-            type: "triangle",
-            currentX: this.currentX,
-            currentY: this.currentY,
-            previosStartX: this.previosStartX,
-            previosStartY: this.previosStartY,
-            previosCurrentX: this.previosCurrentX,
-            previosCurrentY: this.previosCurrentY,
-            strokeColor: this.ctx.strokeStyle,
-            fillColor: this.ctx.fillStyle,
-            lineDash: toolState.lineDashType,
-            lineWidth: this.ctx.lineWidth,
-          },
-        })
-      );
     }
     if (this.transparentStroke) {
       this.ctx.lineWidth = "0";

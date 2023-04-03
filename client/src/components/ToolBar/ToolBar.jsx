@@ -143,11 +143,12 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          toolState.setTool();
-          new Ellipse(
-            canvasState.canvas,
-            canvasState.socket,
-            canvasState.sessionid
+          toolState.setTool(
+            new Ellipse(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
           );
         }}
       >
@@ -158,10 +159,12 @@ function ToolBar() {
         className="toolBar__btn"
         onClick={(e) => {
           checkedBts(e);
-          new Triangle(
-            canvasState.canvas,
-            canvasState.socket,
-            canvasState.sessionid
+          toolState.setTool(
+            new Triangle(
+              canvasState.canvas,
+              canvasState.socket,
+              canvasState.sessionid
+            )
           );
         }}
       >

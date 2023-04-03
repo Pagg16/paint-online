@@ -17,28 +17,28 @@ export default class Rect extends Tools {
     this.mouseDown = false;
     const img = new Image();
     img.src = this.saved;
-    console.log(this.saved);
     img.onload = () => {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+
+      this.socket.send(
+        JSON.stringify({
+          method: "draw",
+          id: this.id,
+          figure: {
+            type: "rect",
+            x: this.startX,
+            y: this.stertY,
+            width: this.width,
+            height: this.height,
+            strokeColor: this.ctx.strokeStyle,
+            fillColor: this.ctx.fillStyle,
+            lineDash: toolState.lineDashType,
+            lineWidth: this.ctx.lineWidth,
+          },
+        })
+      );
     };
-    this.socket.send(
-      JSON.stringify({
-        method: "draw",
-        id: this.id,
-        figure: {
-          type: "rect",
-          x: this.startX,
-          y: this.stertY,
-          width: this.width,
-          height: this.height,
-          strokeColor: this.ctx.strokeStyle,
-          fillColor: this.ctx.fillStyle,
-          lineDash: toolState.lineDashType,
-          lineWidth: this.ctx.lineWidth,
-        },
-      })
-    );
   }
 
   mouseDownhandler(e) {

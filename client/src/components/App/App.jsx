@@ -4,8 +4,25 @@ import SettingBar from "../SettingBar/SettingBar";
 import Canvas from "../Canvas/Canvas";
 import { Route, Routes, Navigate } from "react-router-dom";
 import SingInModal from "../SingInModal/SingInModal";
+import { useEffect } from "react";
+import Loader from "../Loader/Loader";
+import loaderState from "../../store/loaderState";
 
 function App() {
+  useEffect(() => {
+    const onPageLoad = () => {
+      loaderState.setVisible(false);
+      console.log("загрузка завершена");
+    };
+
+    if (document.readyState === "complete") {
+      onPageLoad();
+    } else {
+      window.addEventListener("load", onPageLoad, false);
+
+      return () => window.removeEventListener("load", onPageLoad);
+    }
+  }, []);
   return (
     <div className="app">
       <Routes>
@@ -25,6 +42,7 @@ function App() {
         />
       </Routes>
       {/* <SingInModal /> */}
+      <Loader />
     </div>
   );
 }

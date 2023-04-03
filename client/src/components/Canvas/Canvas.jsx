@@ -6,7 +6,6 @@ import toolState from "../../store/toolState";
 import Brush from "../tools/Brush";
 import { useParams } from "react-router-dom";
 import Rect from "../tools/Rect";
-import axios from "axios";
 import Circle from "../tools/Сircle";
 import Line from "../tools/Line";
 import Eraser from "../tools/Eraser";
@@ -17,9 +16,11 @@ import {
   onopenSocket,
 } from "../../socket/socketCreate";
 import Triangle from "../tools/Triangle";
+import Ellipse from "../tools/Ellipse";
 
 const Canvas = observer(() => {
   const canvasRef = useRef(null);
+  const loop = useRef(true);
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
     height: 0,
@@ -27,7 +28,6 @@ const Canvas = observer(() => {
 
   const canvasBlock = useRef(null);
   const { id } = useParams();
-
   const ctxStyleUser = useRef({});
 
   useEffect(() => {
@@ -58,34 +58,40 @@ const Canvas = observer(() => {
   }, []);
 
   useEffect(() => {
-    if (!!!canvasState.userName) {
-      try {
-        const socket = createSoket();
-        canvasState.setSocket(socket);
-        canvasState.setSessionId(id);
-        toolState.setTool(new Brush(canvasRef.current, socket, id));
-        onopenSocket(socket, () => {
-          console.log("Подключение установлено");
-          socket.send(
-            JSON.stringify({
-              id: id,
-              username: canvasState.userName,
-              method: "connection",
-            })
-          );
-        });
-        onmessageSocket(socket, (e) => {
-          const msg = JSON.parse(e.data);
-          const figure = msg.figure;
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext("2d");
+    if (loop.current) {
+      loop.current = false;
+      return;
+    }
+    try {
+      const socket = createSoket();
+      canvasState.setSocket(socket);
+      canvasState.setSessionId(id);
+      toolState.setTool(new Brush(canvasRef.current, socket, id));
 
-          switch (msg.method) {
-            case "connection":
-              console.log(`пользователь ${msg.username} подключен`);
-              break;
+      onopenSocket(socket, () => {
+        console.log("Подключение установлено");
+        socket.send(
+          JSON.stringify({
+            id: id,
+            username: canvasState.userName,
+            method: "connection",
+          })
+        );
+      });
 
-            case "draw":
+      onmessageSocket(socket, (e) => {
+        const msg = JSON.parse(e.data);
+        const figure = msg.figure;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+
+        switch (msg.method) {
+          case "connection":
+            console.log(`пользователь ${msg.username} подключен`);
+            break;
+
+          case "draw":
+            if (!(figure.type === "finish" || figure.type === "eraser")) {
               const { lineDash, lineWidth, strokeColor, fillColor } = figure;
 
               ctxStyleUser.current = {
@@ -98,36 +104,38 @@ const Canvas = observer(() => {
               };
 
               setStyleCtx(lineDash, lineWidth, strokeColor, fillColor, ctx);
-              drawHandler(figure, ctx);
-              const {
-                lineDashUser,
-                lineWidthUser,
-                strokeColorUser,
-                fillColorUser,
-              } = ctxStyleUser.current;
+            }
 
-              setStyleCtx(
-                lineDashUser,
-                lineWidthUser,
-                strokeColorUser,
-                fillColorUser,
-                ctx
-              );
-              break;
+            drawHandler(figure, ctx);
 
-            case "rest":
-              restCanvas(canvas);
-              break;
+            const {
+              lineDashUser,
+              lineWidthUser,
+              strokeColorUser,
+              fillColorUser,
+            } = ctxStyleUser.current;
 
-            default:
-              break;
-          }
-        });
-      } catch (e) {
-        console.log(e);
-      }
+            setStyleCtx(
+              lineDashUser,
+              lineWidthUser,
+              strokeColorUser,
+              fillColorUser,
+              ctx
+            );
+            break;
+
+          case "rest":
+            restCanvas(canvas);
+            break;
+
+          default:
+            break;
+        }
+      });
+    } catch (e) {
+      console.log(e);
     }
-  }, [canvasState.userName]);
+  }, []);
 
   function restCanvas(canvas) {
     canvasState.pushToUndoList(canvas.toDataURL());
@@ -171,23 +179,25 @@ const Canvas = observer(() => {
         break;
 
       case "triangle":
-        const {
-          previosStartX,
-          previosStartY,
-          previosCurrentX,
-          previosCurrentY,
-          currentX,
-          currentY,
-        } = figure;
-
         Triangle.staticDraw(
           ctx,
-          previosStartX,
-          previosStartY,
-          previosCurrentX,
-          previosCurrentY,
-          currentX,
-          currentY
+          figure.previosStartX,
+          figure.previosStartY,
+          figure.previosCurrentX,
+          figure.previosCurrentY,
+          figure.currentX,
+          figure.currentY
+        );
+        break;
+
+      case "ellipse":
+        Ellipse.staticDraw(
+          ctx,
+          figure.x,
+          figure.y,
+          figure.radiusX,
+          figure.radiusY,
+          figure.corner
         );
         break;
 
@@ -201,14 +211,18 @@ const Canvas = observer(() => {
   }
 
   function mouseUpHandler() {
-    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
     postImage(id).catch((e) => console.log(e));
+  }
+
+  function mouseDownHandler() {
+    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
   }
 
   return (
     <div className="canvas" ref={canvasBlock}>
       <canvas
         onMouseUp={() => mouseUpHandler()}
+        onMouseDown={() => mouseDownHandler()}
         ref={canvasRef}
         className="canvas__gtx"
         width={canvasSize.width}

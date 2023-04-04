@@ -20,6 +20,7 @@ import Line from "../tools/Line";
 import Triangle from "../tools/Triangle";
 import { useParams } from "react-router-dom";
 import Ellipse from "../tools/Ellipse";
+import { postImage } from "../../api/api";
 
 function ToolBar() {
   const { id } = useParams();
@@ -42,18 +43,50 @@ function ToolBar() {
     document.body.removeChild(a);
   }
 
+  async function historyList(type) {
+    const undoListLength = canvasState.undoList.length;
+    const redoListLength = canvasState.redoList.length;
+
+    switch (type) {
+      case "undo":
+        if (!!canvasState.undoList[undoListLength - 1])
+          await postImage(id, canvasState.undoList[undoListLength - 1]).catch(
+            (e) => console.log(e)
+          );
+
+        break;
+
+      case "redo":
+        if (!!canvasState.redoList[redoListLength - 1])
+          await postImage(id, canvasState.redoList[redoListLength - 1]).catch(
+            (e) => console.log(e)
+          );
+        break;
+
+      default:
+        break;
+    }
+
+    canvasState.socket.send(
+      JSON.stringify({
+        method: type,
+        id: id,
+      })
+    );
+  }
+
   return (
     <div className="toolBar">
       <div className="toolBar__btn-container">
         <button
           className="toolBar__btn toolBar__btn_rights"
-          onClick={() => canvasState.undo()}
+          onClick={() => historyList("undo")}
         >
           <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
         </button>
         <button
           className="toolBar__btn toolBar__btn_arrow-redo"
-          onClick={() => canvasState.redo()}
+          onClick={() => historyList("redo")}
         >
           <img className="toolBar__btn-image" src={arrow} alt="brush-icon" />
         </button>

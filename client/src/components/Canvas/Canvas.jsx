@@ -21,6 +21,7 @@ import Ellipse from "../tools/Ellipse";
 const Canvas = observer(() => {
   const canvasRef = useRef(null);
   const loop = useRef(true);
+  const brushLoop = useRef(true);
   const [canvasSize, setCanvasSize] = useState({
     width: 0,
     height: 0,
@@ -91,7 +92,7 @@ const Canvas = observer(() => {
             break;
 
           case "draw":
-            if (!(figure.type === "finish" || figure.type === "eraser")) {
+            if (figure.type !== "finish") {
               const { lineDash, lineWidth, strokeColor, fillColor } = figure;
 
               ctxStyleUser.current = {
@@ -104,9 +105,20 @@ const Canvas = observer(() => {
               };
 
               setStyleCtx(lineDash, lineWidth, strokeColor, fillColor, ctx);
+
+              if (figure.type === "brush") {
+                if (brushLoop.current) {
+                  brushLoop.current = false;
+                  canvasState.pushToUndoList(canvas.toDataURL());
+                }
+              } else {
+                canvasState.pushToUndoList(canvas.toDataURL());
+              }
+            } else {
+              brushLoop.current = true;
             }
 
-            drawHandler(figure, ctx);
+            drawHandler(figure, ctx, canvas);
 
             const {
               lineDashUser,
@@ -122,10 +134,19 @@ const Canvas = observer(() => {
               fillColorUser,
               ctx
             );
+
             break;
 
           case "rest":
             restCanvas(canvas);
+            break;
+
+          case "undo":
+            canvasState.undo();
+            break;
+
+          case "redo":
+            canvasState.redo();
             break;
 
           default:
@@ -140,7 +161,7 @@ const Canvas = observer(() => {
   function restCanvas(canvas) {
     canvasState.pushToUndoList(canvas.toDataURL());
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-    postImage(id).catch((e) => console.log(e));
+    postImage(id, canvasState.canvas.toDataURL()).catch((e) => console.log(e));
   }
 
   function setStyleCtx(lineDash, lineWidth, strokeColor, fillColor, ctx) {
@@ -211,18 +232,13 @@ const Canvas = observer(() => {
   }
 
   function mouseUpHandler() {
-    postImage(id).catch((e) => console.log(e));
-  }
-
-  function mouseDownHandler() {
-    canvasState.pushToUndoList(canvasRef?.current.toDataURL());
+    postImage(id, canvasState.canvas.toDataURL()).catch((e) => console.log(e));
   }
 
   return (
     <div className="canvas" ref={canvasBlock}>
       <canvas
         onMouseUp={() => mouseUpHandler()}
-        onMouseDown={() => mouseDownHandler()}
         ref={canvasRef}
         className="canvas__gtx"
         width={canvasSize.width}

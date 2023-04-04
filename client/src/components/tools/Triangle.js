@@ -129,5 +129,6 @@ export default class Triangle extends Tools {
     ctx.closePath();
     ctx.stroke();
     ctx.fill();
+    ctx.beginPath();
   }
 }

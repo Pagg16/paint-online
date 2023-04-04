@@ -82,5 +82,6 @@ export default class Circle extends Tools {
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.fill();
     ctx.stroke();
+    ctx.beginPath();
   }
 }

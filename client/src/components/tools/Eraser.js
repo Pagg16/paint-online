@@ -16,6 +16,7 @@ export default class Eraser extends Brush {
             x: e.pageX - e.target.offsetLeft,
             y: e.pageY - e.target.offsetTop,
             color: this.ctx.strokeStyle,
+            lineWidth: this.ctx.lineWidth,
           },
         })
       );

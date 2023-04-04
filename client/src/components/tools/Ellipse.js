@@ -110,5 +110,6 @@ export default class Ellipse extends Tools {
     ctx.ellipse(x, y, radiusX, radiusY, corner, 0, 2 * Math.PI);
     ctx.stroke();
     ctx.fill();
+    ctx.beginPath();
   }
 }

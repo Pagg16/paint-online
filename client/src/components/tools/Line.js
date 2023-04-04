@@ -82,5 +82,6 @@ export default class Line extends Tools {
     ctx.lineTo(currentX, currentY);
     ctx.fill();
     ctx.stroke();
+    ctx.beginPath();
   }
 }

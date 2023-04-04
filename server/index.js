@@ -26,6 +26,14 @@ app.ws("/", (ws, req) => {
       case "rest":
         broadcastConnection(ws, msg);
         break;
+
+      case "undo":
+        broadcastConnection(ws, msg);
+        break;
+
+      case "redo":
+        broadcastConnection(ws, msg);
+        break;
     }
   });
 });

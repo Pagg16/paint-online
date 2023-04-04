@@ -75,11 +75,11 @@ export default class Rect extends Tools {
     this.ctx.stroke();
   }
 
-  static staticDraw(ctx, x, y, w, h, color) {
-    ctx.fillStyle = color;
+  static staticDraw(ctx, x, y, w, h) {
     ctx.beginPath();
     ctx.rect(x, y, w, h);
     ctx.fill();
     ctx.stroke();
+    ctx.beginPath();
   }
 }
